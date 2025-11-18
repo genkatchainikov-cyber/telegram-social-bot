@@ -4,10 +4,23 @@ import telebot
 import subprocess
 import re
 import requests
+import threading
+from flask import Flask
 
-# Получаем токен из переменных окружения Heroku
+# Получаем токен из переменных окружения
 TOKEN = os.environ.get('BOT_TOKEN', '8523670344:AAFNlyL2tI9A9tmyHJjnAG5z0HH9nULJSqw')
 bot = telebot.TeleBot(TOKEN)
+
+# Создаем Flask приложение для порта
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Telegram Bot is running!"
+
+@app.route('/health')
+def health():
+    return "OK", 200
 
 def transliterate_russian(text):
     """Транслитерирует русский текст в латиницу"""
@@ -280,32 +293,22 @@ def handle_message(message):
     except Exception as e:
         bot.reply_to(message, f"⚠️ Ошибка: {str(e)}")
 
-if __name__ == "__main__":
+def run_bot():
+    """Запускает бота в отдельном потоке"""
     print("🚀 Бот запущен!")
     print("🔍 Поиск по username, русским именам и номерам телефона")
     print("🌐 ВКонтакте, Telegram и 10+ других платформ")
-    bot.polling(none_stop=True)
-    # Добавьте этот код в конец файла bot.py
-import os
-from flask import Flask
-
-# Создаем минимальное веб-приложение для порта
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return "Bot is running!"
-
-def run_bot():
-    """Запускает бота в отдельном потоке"""
-    import threading
-    bot_thread = threading.Thread(target=bot.polling, daemon=True)
-    bot_thread.start()
+    try:
+        bot.polling(none_stop=True)
+    except Exception as e:
+        print(f"❌ Ошибка бота: {e}")
 
 if __name__ == "__main__":
-    # Запускаем бота в фоне
-    run_bot()
+    # Запускаем бота в фоновом потоке
+    bot_thread = threading.Thread(target=run_bot, daemon=True)
+    bot_thread.start()
     
     # Запускаем веб-сервер для порта
     port = int(os.environ.get("PORT", 10000))
+    print(f"🌐 Веб-сервер запущен на порту {port}")
     app.run(host='0.0.0.0', port=port)

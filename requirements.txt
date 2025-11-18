@@ -1,7 +1,4 @@
 pyTelegramBotAPI==4.15.2
 requests==2.31.0
 sherlock-project==0.16.0
-pyTelegramBotAPI==4.15.2
-requests==2.31.0
-sherlock-project==0.16.0
 Flask==2.3.3
