@@ -285,3 +285,27 @@ if __name__ == "__main__":
     print("🔍 Поиск по username, русским именам и номерам телефона")
     print("🌐 ВКонтакте, Telegram и 10+ других платформ")
     bot.polling(none_stop=True)
+    # Добавьте этот код в конец файла bot.py
+import os
+from flask import Flask
+
+# Создаем минимальное веб-приложение для порта
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is running!"
+
+def run_bot():
+    """Запускает бота в отдельном потоке"""
+    import threading
+    bot_thread = threading.Thread(target=bot.polling, daemon=True)
+    bot_thread.start()
+
+if __name__ == "__main__":
+    # Запускаем бота в фоне
+    run_bot()
+    
+    # Запускаем веб-сервер для порта
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
